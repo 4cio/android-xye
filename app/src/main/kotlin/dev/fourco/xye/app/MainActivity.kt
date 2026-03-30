@@ -18,22 +18,27 @@ import dev.fourco.xye.engine.model.GameStatus
 class MainActivity : ComponentActivity() {
 
     private val kyeParser = KyeParser()
-    private var packs: List<LevelPack> = emptyList()
-    private var currentViewModel: GameViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Load all bundled .kye packs
-        packs = loadBundledPacks()
+        // Load packs once
+        if (GameHolder.packs.isEmpty()) {
+            GameHolder.packs = loadBundledPacks()
+        }
 
         setContent {
             XyeTheme {
-                var screen by remember { mutableStateOf("home") }
-                var selectedPack by remember { mutableStateOf<LevelPack?>(null) }
-                var selectedLevelIndex by remember { mutableStateOf(0) }
+                var screen by remember { mutableStateOf(GameHolder.currentScreen) }
+                var selectedPack by remember { mutableStateOf(GameHolder.selectedPack) }
+                var selectedLevelIndex by remember { mutableStateOf(GameHolder.selectedLevelIndex) }
 
-                val vm = currentViewModel
+                // Sync back to holder on changes
+                GameHolder.currentScreen = screen
+                GameHolder.selectedPack = selectedPack
+                GameHolder.selectedLevelIndex = selectedLevelIndex
+
+                val vm = GameHolder.currentViewModel
                 val gameState = vm?.state?.collectAsState()
                 val state = gameState?.value
 
@@ -47,7 +52,7 @@ class MainActivity : ComponentActivity() {
                         onPlayDemo = { screen = "packs" },
                     )
                     "packs" -> PackListScreen(
-                        packs = packs,
+                        packs = GameHolder.packs,
                         onPackSelected = { pack ->
                             selectedPack = pack
                             screen = "levels"
@@ -69,7 +74,13 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     "game" -> {
-                        vm?.let { GameScreen(viewModel = it) }
+                        vm?.let {
+                            GameScreen(
+                                viewModel = it,
+                                onQuit = { screen = "levels" },
+                                onReset = { it.reset() },
+                            )
+                        }
                     }
                     "win" -> WinScreen(
                         onHome = { screen = "home" },
@@ -84,15 +95,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun launchLevel(pack: LevelPack, index: Int) {
-        val stream = javaClass.classLoader?.getResourceAsStream("packs/kye/${findKyeFile(pack.id)}")
+        val stream = javaClass.classLoader?.getResourceAsStream("packs/kye/${pack.id}.kye")
             ?: return
         val level = kyeParser.parseLevel(stream, index)
-        currentViewModel = GameViewModel(level.toInitialState())
-    }
-
-    private fun findKyeFile(packId: String): String {
-        // packId matches the filename we used to parse
-        return "$packId.kye"
+        GameHolder.currentViewModel = GameViewModel(level.toInitialState())
     }
 
     private fun loadBundledPacks(): List<LevelPack> {
@@ -113,7 +119,7 @@ class MainActivity : ComponentActivity() {
                     ?: return@mapNotNull null
                 kyeParser.parsePack(name, stream)
             } catch (e: Exception) {
-                null // Skip unparseable packs
+                null
             }
         }.sortedBy { it.name.lowercase() }
     }

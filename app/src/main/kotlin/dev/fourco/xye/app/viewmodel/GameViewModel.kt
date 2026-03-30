@@ -1,7 +1,6 @@
 package dev.fourco.xye.app.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.fourco.xye.engine.model.*
 import dev.fourco.xye.engine.rules.GameEngine
@@ -14,9 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class GameViewModel(initialState: GameState) : ViewModel() {
+class GameViewModel(private val initialState: GameState) : ViewModel() {
 
-    private val engine = GameEngine(initialState)
+    private var engine = GameEngine(initialState)
 
     private val _state = MutableStateFlow(engine.state)
     val state: StateFlow<GameState> = _state.asStateFlow()
@@ -25,7 +24,9 @@ class GameViewModel(initialState: GameState) : ViewModel() {
     private var loopJob: Job? = null
 
     companion object {
-        const val TICK_INTERVAL_MS = 150L
+        // Original Xye: 20 FPS = 50ms per frame. But player moves every 2 ticks.
+        // Use 250ms for a comfortable puzzle pace.
+        const val TICK_INTERVAL_MS = 250L
     }
 
     init {
@@ -33,6 +34,7 @@ class GameViewModel(initialState: GameState) : ViewModel() {
     }
 
     private fun startLoop() {
+        loopJob?.cancel()
         loopJob = viewModelScope.launch {
             while (isActive) {
                 val input = inputChannel.tryReceive().getOrNull() ?: InputIntent.Wait
@@ -48,10 +50,9 @@ class GameViewModel(initialState: GameState) : ViewModel() {
         inputChannel.trySend(intent)
     }
 
-    class Factory(private val initialState: GameState) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return GameViewModel(initialState) as T
-        }
+    fun reset() {
+        engine = GameEngine(initialState)
+        _state.value = engine.state
+        startLoop()
     }
 }
