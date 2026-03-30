@@ -1,0 +1,35 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+.navigation/
+captures/
+
+# Local properties (SDK path, signing keys)
+local.properties
+keystore.properties
+
+# APK / AAB / mapping
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+mapping/
+
+# Kotlin
+*.kotlin_module
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
