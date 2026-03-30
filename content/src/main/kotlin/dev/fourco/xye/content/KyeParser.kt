@@ -12,7 +12,7 @@ class KyeParser : LevelParser {
     }
 
     override fun parsePack(name: String, input: InputStream): LevelPack {
-        val lines = input.bufferedReader().readLines()
+        val lines = input.bufferedReader().readLines().map { it.trimEnd('\r') }
         val levelCount = lines.first().trim().toInt()
         val metas = mutableListOf<LevelMeta>()
 
@@ -43,14 +43,13 @@ class KyeParser : LevelParser {
     }
 
     override fun parseLevel(input: InputStream, index: Int): RuntimeLevel {
-        val lines = input.bufferedReader().readLines()
+        val lines = input.bufferedReader().readLines().map { it.trimEnd('\r') }
         val levelCount = lines.first().trim().toInt()
         require(index in 0 until levelCount) { "Level index $index out of range ($levelCount levels)" }
 
-        // Skip to the right level
         var lineIdx = 1
         for (i in 0 until index) {
-            lineIdx += 3 + KYE_HEIGHT // name + hint + bye + 20 rows
+            lineIdx += 3 + KYE_HEIGHT
         }
 
         val levelName = lines[lineIdx++].trim()
@@ -59,7 +58,7 @@ class KyeParser : LevelParser {
 
         val gridRows = (0 until KYE_HEIGHT).map { r ->
             val line = if (lineIdx + r < lines.size) lines[lineIdx + r] else ""
-            line.padEnd(KYE_WIDTH) // pad short lines with spaces
+            line.padEnd(KYE_WIDTH)
         }
 
         return buildLevel(gridRows, index, levelName, hint)
@@ -85,33 +84,58 @@ class KyeParser : LevelParser {
         for (row in rows.indices) {
             val line = rows[row]
             for (col in 0 until minOf(line.length, KYE_WIDTH)) {
+                // Real Kye character map (from original Kye game by Colin Garbutt)
                 when (line[col]) {
                     'K' -> { add(EntityKind.Player, col, row); playerStart = Position(col, row) }
+
+                    // Walls
+                    '5' -> add(EntityKind.Wall, col, row)
                     '#' -> add(EntityKind.Wall, col, row)
-                    'd' -> { add(EntityKind.Gem, col, row); totalGems++ }
-                    '*' -> { add(EntityKind.StarGem, col, row); totalStars++ }
+
+                    // Collectibles: * = diamond (the main gem to collect)
+                    '*' -> { add(EntityKind.Gem, col, row); totalGems++ }
+
+                    // Blocks
                     'B' -> add(EntityKind.PushBlock, col, row)
-                    'R' -> add(EntityKind.RoundBlock, col, row)
-                    'b' -> add(EntityKind.SoftBlock, col, row)
+                    'b' -> add(EntityKind.RoundBlock, col, row)
+
+                    // Earth (consumable on walk-through)
+                    'e' -> add(EntityKind.SoftBlock, col, row)
+
+                    // Sliders (move in one direction, stop when blocked)
                     '1' -> add(EntityKind.SliderRight, col, row)
                     '2' -> add(EntityKind.SliderDown, col, row)
                     '3' -> add(EntityKind.SliderLeft, col, row)
                     '4' -> add(EntityKind.SliderUp, col, row)
-                    '5' -> add(EntityKind.RockyRight, col, row)
-                    '6' -> add(EntityKind.RockyDown, col, row)
-                    '7' -> add(EntityKind.RockyLeft, col, row)
-                    '8' -> add(EntityKind.RockyUp, col, row)
+
+                    // Rockies (move in one direction, reverse when blocked)
+                    'u' -> add(EntityKind.RockyUp, col, row)
+                    'd' -> add(EntityKind.RockyDown, col, row)
+                    'l' -> add(EntityKind.RockyLeft, col, row)
+                    'r' -> add(EntityKind.RockyRight, col, row)
+                    'R' -> add(EntityKind.RockyRight, col, row)
+
+                    // Hazards
                     'H' -> add(EntityKind.BlackHole, col, row)
                     'T' -> add(EntityKind.TimerBlock, col, row, EntityProps(timerTicks = 9))
-                    'S' -> add(EntityKind.Shooter, col, row, EntityProps(
-                        shootInterval = 10,
-                        shootKind = EntityKind.SliderRight,
-                        direction = Direction.RIGHT,
-                    ))
-                    'M' -> add(EntityKind.Monster, col, row)
+
+                    // Monsters
+                    'S' -> add(EntityKind.Monster, col, row) // Sentry
+                    'F' -> add(EntityKind.Monster, col, row) // Gnasher
+                    'M' -> add(EntityKind.Monster, col, row) // Monster
                     '~' -> add(EntityKind.Hazard, col, row)
+
+                    // Magnets
                     'h' -> add(EntityKind.MagnetH, col, row)
                     'v' -> add(EntityKind.MagnetV, col, row)
+
+                    // Turners (map to generic for now)
+                    'a' -> {} // anti-clockwise turner - skip for now
+                    'c' -> {} // clockwise turner - skip for now
+
+                    // One-way doors (ground objects - skip for now)
+                    '^', 'V', '<', '>' -> {}
+
                     '.', ' ' -> { /* empty */ }
                     else -> { /* unknown char, treat as empty */ }
                 }
