@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pack name="Test Pack" author="Test">
+  <level name="Teleport Test" width="10" height="10">
+    <objects>
+      <xye x="1" y="1" />
+      <gem x="8" y="8" />
+      <wall x="0" y="0" /><wall x="1" y="0" /><wall x="2" y="0" /><wall x="3" y="0" /><wall x="4" y="0" /><wall x="5" y="0" /><wall x="6" y="0" /><wall x="7" y="0" /><wall x="8" y="0" /><wall x="9" y="0" />
+      <wall x="0" y="9" /><wall x="1" y="9" /><wall x="2" y="9" /><wall x="3" y="9" /><wall x="4" y="9" /><wall x="5" y="9" /><wall x="6" y="9" /><wall x="7" y="9" /><wall x="8" y="9" /><wall x="9" y="9" />
+      <wall x="0" y="1" /><wall x="9" y="1" />
+      <wall x="0" y="2" /><wall x="9" y="2" />
+      <wall x="0" y="3" /><wall x="9" y="3" />
+      <wall x="0" y="4" /><wall x="9" y="4" />
+      <wall x="0" y="5" /><wall x="9" y="5" />
+      <wall x="0" y="6" /><wall x="9" y="6" />
+      <wall x="0" y="7" /><wall x="9" y="7" />
+      <wall x="0" y="8" /><wall x="9" y="8" />
+      <teleport x="3" y="3" pair="1" dir="R" />
+      <teleport x="7" y="7" pair="1" dir="L" />
+      <beast x="5" y="5" kind="0" />
+    </objects>
+  </level>
+  <level name="Timer Test" width="10" height="5">
+    <objects>
+      <xye x="1" y="2" />
+      <gem x="8" y="2" />
+      <wall x="0" y="0" /><wall x="1" y="0" /><wall x="2" y="0" /><wall x="3" y="0" /><wall x="4" y="0" /><wall x="5" y="0" /><wall x="6" y="0" /><wall x="7" y="0" /><wall x="8" y="0" /><wall x="9" y="0" />
+      <wall x="0" y="4" /><wall x="1" y="4" /><wall x="2" y="4" /><wall x="3" y="4" /><wall x="4" y="4" /><wall x="5" y="4" /><wall x="6" y="4" /><wall x="7" y="4" /><wall x="8" y="4" /><wall x="9" y="4" />
+      <wall x="0" y="1" /><wall x="9" y="1" />
+      <wall x="0" y="2" /><wall x="9" y="2" />
+      <wall x="0" y="3" /><wall x="9" y="3" />
+      <timer x="5" y="2" value="3" bc="R" />
+    </objects>
+  </level>
+</pack>
