@@ -50,7 +50,7 @@ fun HomeScreen(
             ),
         ) {
             Text(
-                text = "Play Demo Level",
+                text = "Play",
                 fontSize = 18.sp,
                 modifier = Modifier.padding(vertical = 8.dp),
             )
@@ -59,7 +59,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Push blocks onto gems to collect them.\nCollect all gems to win!",
+            text = "473 levels from 28 community packs",
             fontSize = 14.sp,
             color = Color(0xFF8A7A5A),
             textAlign = TextAlign.Center,
