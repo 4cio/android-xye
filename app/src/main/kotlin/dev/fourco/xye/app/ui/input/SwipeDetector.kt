@@ -8,17 +8,27 @@ import kotlin.math.abs
 
 fun Modifier.swipeInput(
     onInput: (InputIntent) -> Unit,
-    threshold: Float = 50f,
+    threshold: Float = 40f,
 ): Modifier = this.pointerInput(Unit) {
-    detectDragGestures { _, dragAmount ->
-        val (dx, dy) = dragAmount
-        if (abs(dx) < threshold && abs(dy) < threshold) return@detectDragGestures
+    var cumDx = 0f
+    var cumDy = 0f
 
-        val intent = if (abs(dx) > abs(dy)) {
-            if (dx > 0) InputIntent.MoveRight else InputIntent.MoveLeft
-        } else {
-            if (dy > 0) InputIntent.MoveDown else InputIntent.MoveUp
-        }
-        onInput(intent)
-    }
+    detectDragGestures(
+        onDragStart = { cumDx = 0f; cumDy = 0f },
+        onDrag = { _, dragAmount ->
+            cumDx += dragAmount.x
+            cumDy += dragAmount.y
+
+            if (abs(cumDx) >= threshold || abs(cumDy) >= threshold) {
+                val intent = if (abs(cumDx) > abs(cumDy)) {
+                    if (cumDx > 0) InputIntent.MoveRight else InputIntent.MoveLeft
+                } else {
+                    if (cumDy > 0) InputIntent.MoveDown else InputIntent.MoveUp
+                }
+                onInput(intent)
+                cumDx = 0f
+                cumDy = 0f
+            }
+        },
+    )
 }

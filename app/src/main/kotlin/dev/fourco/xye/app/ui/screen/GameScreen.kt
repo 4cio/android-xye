@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.fourco.xye.app.ui.component.BoardCanvas
-import dev.fourco.xye.app.ui.component.DPad
 import dev.fourco.xye.app.ui.input.swipeInput
 import dev.fourco.xye.app.viewmodel.GameViewModel
 import dev.fourco.xye.engine.model.GameStatus
@@ -51,101 +50,106 @@ fun GameScreen(
                     } else false
                 } else false
             },
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // HUD bar
+        // Compact HUD bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFDDD0B8))
-                .padding(horizontal = 8.dp, vertical = 6.dp),
+                .padding(horizontal = 4.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onQuit) {
-                Text("\u2190 Quit", color = Color(0xFF4A3728), fontSize = 14.sp)
+            TextButton(
+                onClick = onQuit,
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+            ) {
+                Text("\u2190", color = Color(0xFF4A3728), fontSize = 16.sp)
             }
 
             Text(
                 text = state.levelId,
                 color = Color(0xFF4A3728),
-                style = MaterialTheme.typography.titleSmall,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
             )
 
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Gem count
             Text(
-                text = "Gems: ${state.goals.collectedGems}/${state.goals.totalGems}",
+                text = "\u25C6 ${state.goals.collectedGems}/${state.goals.totalGems}",
                 color = Color(0xFF2288AA),
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
             )
-        }
 
-        // Status banner
-        when (state.status) {
-            GameStatus.Won -> {
+            // Star count inline
+            if (state.goals.totalStars > 0) {
                 Text(
-                    text = "Level Complete!",
-                    color = Color(0xFF33CC33),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(8.dp),
+                    text = "  \u2605 ${state.goals.collectedStars}/${state.goals.totalStars}",
+                    color = Color(0xFFDDAA00),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
                 )
             }
-            GameStatus.Lost -> {
-                Text(
-                    text = "Game Over",
-                    color = Color(0xFFDD2222),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(8.dp),
-                )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Undo button
+            TextButton(
+                onClick = { viewModel.onInput(InputIntent.Undo) },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+            ) {
+                Text("Undo", color = Color(0xFF4A3728), fontSize = 13.sp)
             }
-            else -> {}
+
+            // Reset button
+            TextButton(
+                onClick = onReset,
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+            ) {
+                Text("Reset", color = Color(0xFF8A7A5A), fontSize = 13.sp)
+            }
         }
 
-        // Board
-        BoardCanvas(
-            state = state,
+        // Board fills everything else
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 2.dp)
-                .swipeInput(onInput = viewModel::onInput),
-        )
-
-        // Star count (if any)
-        if (state.goals.totalStars > 0) {
-            Text(
-                text = "Stars: ${state.goals.collectedStars}/${state.goals.totalStars}",
-                color = Color(0xFFDDAA00),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(2.dp),
-            )
-        }
-
-        // Controls
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp, start = 8.dp, end = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center,
         ) {
-            DPad(onInput = viewModel::onInput)
+            BoardCanvas(
+                state = state,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(2.dp)
+                    .swipeInput(onInput = viewModel::onInput),
+            )
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                FilledTonalButton(onClick = { viewModel.onInput(InputIntent.Undo) }) {
-                    Text("Undo")
-                }
-                OutlinedButton(onClick = onReset) {
-                    Text("Reset")
-                }
+            // Won/Lost overlay
+            when (state.status) {
+                GameStatus.Won -> StatusOverlay("Level Complete!", Color(0xFF33CC33))
+                GameStatus.Lost -> StatusOverlay("Game Over", Color(0xFFDD2222))
+                else -> {}
             }
         }
+    }
+}
+
+@Composable
+private fun StatusOverlay(text: String, color: Color) {
+    Surface(
+        color = Color.White.copy(alpha = 0.85f),
+        shape = MaterialTheme.shapes.medium,
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+        )
     }
 }
