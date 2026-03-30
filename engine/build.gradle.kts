@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.serialization.json)
 
     testImplementation(libs.junit5)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.coroutines.test)
 }
 
