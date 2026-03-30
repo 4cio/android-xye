@@ -28,7 +28,7 @@ fun GameScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0F0F23))
+            .background(Color(0xFFE8E0D0))
             .onKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown) {
                     val intent = when (event.key) {
@@ -57,13 +57,13 @@ fun GameScreen(
         ) {
             Text(
                 text = state.levelId,
-                color = Color.White,
+                color = Color(0xFF4A3728),
                 style = MaterialTheme.typography.titleMedium,
             )
 
             Text(
                 text = "Gems: ${state.goals.collectedGems}/${state.goals.totalGems}",
-                color = Color(0xFF00BCD4),
+                color = Color(0xFF2288AA),
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
