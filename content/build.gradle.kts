@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.xmlutil.serialization)
 
     testImplementation(libs.junit5)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
