@@ -1,6 +1,7 @@
 package dev.fourco.xye.app.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.fourco.xye.engine.model.*
 import dev.fourco.xye.engine.rules.GameEngine
@@ -45,5 +46,12 @@ class GameViewModel(initialState: GameState) : ViewModel() {
 
     fun onInput(intent: InputIntent) {
         inputChannel.trySend(intent)
+    }
+
+    class Factory(private val initialState: GameState) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return GameViewModel(initialState) as T
+        }
     }
 }
